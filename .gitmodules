@@ -1,0 +1,3 @@
+[submodule "deps/farmhash"]
+	path = deps/farmhash
+	url = git@github.com:google/farmhash.git

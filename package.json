@@ -1,0 +1,31 @@
+{
+  "name": "farmhash",
+  "version": "0.0.1",
+  "description": "native node bindings to the FarmHash family of hash functions",
+  "scripts": {
+    "build": "ncmake --clean-first --build build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/michaelficarra/node-farmhash.git"
+  },
+  "keywords": [
+    "farmhash",
+    "hash",
+    "function",
+    "native",
+    "node",
+    "binding",
+    "C++"
+  ],
+  "author": "Michael Ficarra",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/michaelficarra/node-farmhash/issues"
+  },
+  "homepage": "https://github.com/michaelficarra/node-farmhash#readme",
+  "dependencies": {
+    "node-cmake": "1.1.0"
+  }
+}
