@@ -5,7 +5,7 @@
 
 #include "./deps/farmhash/src/farmhash.cc"
 
-namespace farmhash_node {
+namespace node_farmhash {
 
 template<int Bits>
 class UintTrait {
@@ -75,11 +75,11 @@ static inline void toHex(typename UintTrait<BITS>::Type bits, v8::ReturnValue<v8
 }
 
 template<int BITS>
-static inline void toUint32Array(typename UintTrait<BITS>::Type bits, v8::ReturnValue<v8::Value> returnValue) {
+static inline void toArrayBuffer(typename UintTrait<BITS>::Type bits, v8::ReturnValue<v8::Value> returnValue) {
   size_t bytes = (size_t) (BITS / 8);
   auto arrayBuffer = v8::ArrayBuffer::New(returnValue.GetIsolate(), bytes);
   memcpy(arrayBuffer->GetContents().Data(), &bits, bytes);
-  return returnValue.Set(v8::Uint32Array::New(arrayBuffer, 0, bytes / 4));
+  return returnValue.Set(arrayBuffer);
 }
 
 template<int BITS, void formatter(typename UintTrait<BITS>::Type bits, v8::ReturnValue<v8::Value> returnValue)>
@@ -101,18 +101,18 @@ static void genFP(const v8::FunctionCallbackInfo<v8::Value>& args) {
   }
 }
 
-}  // namespace farmhash_node
+}  // namespace node_farmhash
 
 void init(v8::Local<v8::Object> exports) {
-  using namespace farmhash_node;
+  using namespace node_farmhash;
 
   NODE_SET_METHOD(exports, "fingerprint32", genFP<32, toNumber<32>>);
   NODE_SET_METHOD(exports, "fingerprint32asHex", genFP<32, toHex<32>>);
-  NODE_SET_METHOD(exports, "fingerprint32asUint32Array", genFP<32, toUint32Array<32>>);
+  NODE_SET_METHOD(exports, "fingerprint32asArrayBuffer", genFP<32, toArrayBuffer<32>>);
   NODE_SET_METHOD(exports, "fingerprint64asHex", genFP<64, toHex<64>>);
-  NODE_SET_METHOD(exports, "fingerprint64asUint32Array", genFP<64, toUint32Array<64>>);
+  NODE_SET_METHOD(exports, "fingerprint64asArrayBuffer", genFP<64, toArrayBuffer<64>>);
   NODE_SET_METHOD(exports, "fingerprint128asHex", genFP<128, toHex<128>>);
-  NODE_SET_METHOD(exports, "fingerprint128asUint32Array", genFP<128, toUint32Array<128>>);
+  NODE_SET_METHOD(exports, "fingerprint128asArrayBuffer", genFP<128, toArrayBuffer<128>>);
 }
 
 NODE_MODULE(farmhash, init)
