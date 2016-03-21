@@ -1,4 +1,5 @@
 #include <node.h>
+#include <node_buffer.h>
 #include <functional>
 
 #define NAMESPACE_FOR_HASH_FUNCTIONS farmhash
@@ -59,6 +60,11 @@ static inline typename UintTrait<BITS>::Type genFingerPrintFromArrayBuffer(v8::A
 };
 
 template<int BITS>
+static inline typename UintTrait<BITS>::Type genFingerPrintFromNodeBuffer(v8::Local<v8::Value> buffer) {
+  return genFingerPrint<BITS>(node::Buffer::Data(buffer), node::Buffer::Length(buffer));
+};
+
+template<int BITS>
 static inline void toNumber(typename UintTrait<BITS>::Type bits, v8::ReturnValue<v8::Value> returnValue) {
   return returnValue.Set(v8::Number::New(returnValue.GetIsolate(), (double) bits));
 }
@@ -92,12 +98,17 @@ static void genFP(const v8::FunctionCallbackInfo<v8::Value>& args) {
   if (args[0]->IsString()) {
     v8::String* str = *v8::Local<v8::String>::Cast(args[0]);
     formatter(genFingerPrint<BITS>(str), args.GetReturnValue());
-  } else if (args[0]->IsUint8Array()) {
-    v8::ArrayBuffer::Contents contents = v8::Local<v8::Uint8Array>::Cast(args[0])->Buffer()->GetContents();
+  } else if (args[0]->IsArrayBuffer()) {
+    v8::ArrayBuffer::Contents contents = v8::Local<v8::ArrayBuffer>::Cast(args[0])->GetContents();
     formatter(genFingerPrintFromArrayBuffer<BITS>(contents), args.GetReturnValue());
+  } else if (args[0]->IsArrayBufferView()) {
+    v8::ArrayBuffer::Contents contents = v8::Local<v8::ArrayBufferView>::Cast(args[0])->Buffer()->GetContents();
+    formatter(genFingerPrintFromArrayBuffer<BITS>(contents), args.GetReturnValue());
+  } else if (node::Buffer::HasInstance(args[0])) {
+    formatter(genFingerPrintFromNodeBuffer<BITS>(args[0]), args.GetReturnValue());
   } else {
     isolate->ThrowException(
-        v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "First argument must be String or Uint8Array")));
+        v8::Exception::TypeError(v8::String::NewFromUtf8(isolate, "First argument must be ArrayBuffer, ArrayBufferView, Buffer, or String")));
   }
 }
 
